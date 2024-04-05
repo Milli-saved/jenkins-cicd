@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+    stages {
+        stage('check mvn'){
+            steps{
+                script {
+                    def exists = fileExists 'mvnw'
+                    if(exists){
+                        currentBuild.description = 'mvnProject'
+                    }
+                    else{
+                        error 'not mvn project.'
+                    }
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'echo "The tests belong here."'
+            }
+        }
+        stage('Build') {
+            when {
+                expression { currentBuild.description == 'mvnProject'}
+            }
+            steps {
+                sh 'mvn clean install"'
+            }
+            post {
+                success {
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+               echo "this is the deployment."
+            }
+        }
+    }
+}
